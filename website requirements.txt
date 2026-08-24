@@ -1,0 +1,22 @@
+Client Name: Papa Gabs Travel & Tours
+Owner Details: JOSEPHINE ROTONI HILL
+Papagabs Travel and Tours
+Sitio Baito, Brgy. Poctoy, Odiongan, Romblon 
+
+
+Phase 1 — Digital Brochure
+
+-Design and build a responsive, up to 3-screen digital brochure website
+-Integrate multimedia links (photos, videos, and promotional content)
+-Add a "Chat with us" Messenger button linking directly to the agency's Facebook Page
+-Optimize site for mobile and desktop viewing
+-Deploy to hosting with domain setup
+
+Phase 2 — Booking Capability
+
+-Build booking request form with date/package selection
+-Integrate with a calendar service (e.g., Google Calendar) for availability sync
+-Set up automated email notifications to the agency owner for new bookings
+-Set up automated SMS notifications to the agency owner for new bookings
+-Configure backend database for storing and managing booking records
+-Testing and handoff with basic usage walkthrough for the owner
