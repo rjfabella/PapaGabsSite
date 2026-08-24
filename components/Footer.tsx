@@ -9,6 +9,7 @@ const sections = [
   { href: "#rate-cards", label: "Download rates" },
   { href: "#gallery", label: "Gallery" },
   { href: "#experience", label: "Experiences" },
+  { href: "#video", label: "Watch" },
   { href: "#faq", label: "FAQ" },
   { href: "#contact", label: "Contact" },
 ];

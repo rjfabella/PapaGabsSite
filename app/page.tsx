@@ -6,6 +6,7 @@ import { Packages } from "@/components/Packages";
 import { RateCalculator } from "@/components/RateCalculator";
 import { RateCards } from "@/components/RateCards";
 import { Gallery } from "@/components/Gallery";
+import { PromoVideo } from "@/components/PromoVideo";
 import { Faq } from "@/components/Faq";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
@@ -23,6 +24,7 @@ export default function Home() {
         <RateCalculator />
         <RateCards />
         <Gallery />
+        <PromoVideo />
         <Faq />
         <Contact />
       </main>
