@@ -1,0 +1,177 @@
+@import "tailwindcss";
+
+:root {
+  /* Tropical palette — bright lagoon water, sunset coral, warm sand */
+  --deep: #06303f;
+  --deep-soft: #0d4a5e;
+  --lagoon: #00b2c7;
+  --lagoon-light: #7fe3ec;
+  --lagoon-dark: #018c9d;
+  --coral: #ff7a5c;
+  --coral-dark: #f2603f;
+  --sun: #ffc857;
+  --palm: #2fae7f;
+  --sand: #fffaf3;
+  --foam: #eefbfd;
+  --ink: #0b2430;
+
+  --background: var(--sand);
+  --foreground: var(--ink);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-deep: var(--deep);
+  --color-deep-soft: var(--deep-soft);
+  --color-lagoon: var(--lagoon);
+  --color-lagoon-light: var(--lagoon-light);
+  --color-lagoon-dark: var(--lagoon-dark);
+  --color-coral: var(--coral);
+  --color-coral-dark: var(--coral-dark);
+  --color-sun: var(--sun);
+  --color-palm: var(--palm);
+  --color-sand: var(--sand);
+  --color-foam: var(--foam);
+  --color-ink: var(--ink);
+
+  --font-sans: var(--font-jakarta);
+  --font-display: var(--font-outfit);
+}
+
+html {
+  scroll-behavior: smooth;
+  /* keep anchored sections clear of the fixed header */
+  scroll-padding-top: 5rem;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.text-balance {
+  text-wrap: balance;
+}
+
+/* ---------- Scroll reveal ---------- */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: none;
+}
+
+/*
+ * Safety net: if the page never actually renders (background tab, headless
+ * crawler, prerenderer), IntersectionObserver callbacks never fire and every
+ * .reveal would stay at opacity 0 — a blank page. The inline script in the
+ * layout sets this class when requestAnimationFrame doesn't run, so content
+ * is shown unconditionally rather than animated in.
+ */
+html.reveal-fallback .reveal {
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
+/* ---------- Utilities ---------- */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.glass {
+  background: color-mix(in srgb, white 14%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid color-mix(in srgb, white 26%, transparent);
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-9px);
+  }
+}
+.animate-float-slow {
+  animation: float-slow 5s ease-in-out infinite;
+}
+
+@keyframes nudge-down {
+  0%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.75;
+  }
+  50% {
+    transform: translateY(7px);
+    opacity: 1;
+  }
+}
+.animate-nudge-down {
+  animation: nudge-down 2s ease-in-out infinite;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-fade-in {
+  animation: fade-in 0.28s ease-out both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.animate-pop-in {
+  animation: pop-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ---------- Reduced motion ---------- */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+  .animate-float-slow,
+  .animate-nudge-down,
+  .animate-fade-in,
+  .animate-pop-in {
+    animation: none;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+  }
+}
