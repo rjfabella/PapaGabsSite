@@ -12,6 +12,7 @@ const navLinks = [
   { href: "#rate-cards", label: "Rate Cards" },
   { href: "#gallery", label: "Gallery" },
   { href: "#experience", label: "Experiences" },
+  { href: "#video", label: "Watch" },
   { href: "#faq", label: "FAQ" },
   { href: "#contact", label: "Contact" },
 ];
