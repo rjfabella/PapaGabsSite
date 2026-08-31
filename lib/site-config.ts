@@ -13,7 +13,7 @@ export const siteConfig = {
   facebookPageUrl: "https://www.facebook.com/jorotonihill",
   facebookMessengerUrl: "https://m.me/jorotonihill",
   mapsQuery: "Papagabs Travel and Tours, Sitio Baito, Brgy. Poctoy, Odiongan, Romblon",
-  siteUrl: "https://rjfabella.github.io/PapaGabsSite",
+  siteUrl: "https://papagabstravel.com",
 
   // Accreditation / partner links shown as floating badges
   dotUrl: "https://www.tourism.gov.ph",

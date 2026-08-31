@@ -28,10 +28,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## ⚠️ Linking to files in `public/`
 
-The site deploys under a basePath (`/PapaGabsSite`). Next only applies that
-automatically to `next/link` — **not** to `next/image` when `images.unoptimized`
-is set, and not to raw `<a href>`, `<img src>`, or metadata icons. Anything
-pointing at `public/` must therefore go through [`assetUrl()`](lib/asset.ts):
+The site now serves from the custom domain root, so `basePath` is `""` and
+`assetUrl()` is a pass-through. Keep using it anyway: Next only applies a
+basePath automatically to `next/link` — **not** to `next/image` when
+`images.unoptimized` is set, and not to raw `<a href>`, `<img src>`, or metadata
+icons. Routing `public/` links through [`assetUrl()`](lib/asset.ts) keeps the
+site correct if a basePath is ever reintroduced:
 
 ```tsx
 import { Img as Image } from "@/components/Img";   // instead of next/image
@@ -86,15 +88,24 @@ One-time repo setup: **Settings → Pages → Source → GitHub Actions**. The s
 publishes to:
 
 ```
-https://rjfabella.github.io/PapaGabsSite/
+https://papagabstravel.com/
 ```
 
-### Custom domain later
+### Custom domain
 
-`basePath`/`assetPrefix` are set to `/PapaGabsSite` so assets resolve at the project
-page URL. If a custom domain is added, remove those two lines from
-[next.config.ts](next.config.ts), add a `CNAME` file under `public/`, and update
-`siteUrl` in [lib/site-config.ts](lib/site-config.ts) so canonical/OG URLs stay correct.
+`papagabstravel.com` (Cloudflare Registrar) is the live domain. Three things hold
+it together, and all three must stay in sync:
+
+- [public/CNAME](public/CNAME) — copied to `out/` on every build; this is what
+  re-registers the domain with GitHub Pages each deploy. Delete it and the custom
+  domain silently reverts on the next push.
+- [next.config.ts](next.config.ts) — `basePath`/`assetPrefix` are `""` because the
+  site serves from `/` rather than a project page path.
+- `siteUrl` in [lib/site-config.ts](lib/site-config.ts) — canonical, OG, and JSON-LD URLs.
+
+DNS lives in Cloudflare: four apex `A` records to GitHub's `185.199.108-111.153`,
+plus a `www` CNAME to `rjfabella.github.io`, all **DNS only** (unproxied) so
+GitHub can issue and renew its Let's Encrypt certificate.
 
 ## Phase 2 note
 

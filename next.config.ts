@@ -1,11 +1,10 @@
 import type { NextConfig } from "next";
 
-// Served at https://rjfabella.github.io/PapaGabsSite/ until a custom domain
-// is configured. If a custom domain (CNAME) is added later, drop the
-// basePath/assetPrefix below since the site will then serve from "/".
-const repoBasePath = "/PapaGabsSite";
-const isGithubActionsBuild = process.env.GITHUB_ACTIONS === "true";
-const basePath = isGithubActionsBuild ? repoBasePath : "";
+// Served at https://papagabstravel.com/ via the custom domain in public/CNAME,
+// so the site lives at "/" and needs no basePath. (Before the domain was added
+// it served from https://rjfabella.github.io/PapaGabsSite/ and every asset had
+// to be prefixed with "/PapaGabsSite".)
+const basePath = "";
 
 const nextConfig: NextConfig = {
   output: "export",
