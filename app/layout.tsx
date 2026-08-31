@@ -3,6 +3,7 @@ import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import { faqs } from "@/lib/faqs";
+import { dayTours, multidayTours } from "@/lib/tours";
 import { assetUrl } from "@/lib/asset";
 
 const outfit = Outfit({
@@ -18,26 +19,46 @@ const jakarta = Plus_Jakarta_Sans({
 });
 
 const description =
-  "DOT-accredited travel and tours agency in Odiongan, Romblon. Day tours, island hopping and multiday packages across Romblon, Sibuyan, Tablas and Carabao.";
+  "DOT-accredited travel agency in Odiongan, Romblon, Philippines. Budget-friendly island hopping, unexplored beaches and multiday tour packages across Tablas, Sibuyan and Carabao.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.siteUrl),
-  title: `${siteConfig.name} | ${siteConfig.tagline}`,
+  title: {
+    default: `${siteConfig.name} | Romblon Island Hopping & Budget Tour Packages`,
+    template: `%s | ${siteConfig.name}`,
+  },
   description,
+  alternates: { canonical: "/" },
   keywords: [
-    "Romblon tours",
+    // Target queries: Philippines, travel, Romblon, island hopping,
+    // unexplored beaches, budget travel.
+    "Romblon Philippines",
     "Romblon travel agency",
+    "Romblon tour package",
+    "island hopping Philippines",
     "island hopping Romblon",
-    "Odiongan tours",
-    "Sibuyan tour package",
-    "Tablas island tour",
-    "DOT accredited Romblon",
+    "unexplored beaches Philippines",
+    "hidden beaches Romblon",
+    "budget travel Philippines",
+    "budget tour package Romblon",
+    "Odiongan Romblon tours",
+    "Tablas Island tour",
+    "Sibuyan Island tour",
+    "Carabao Island tour",
+    "DOT accredited travel agency Romblon",
   ],
+  category: "travel",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1 },
+  },
   // Metadata icons don't get basePath applied automatically either.
   icons: { icon: assetUrl("/images/logo.png"), apple: assetUrl("/images/logo.png") },
   openGraph: {
     type: "website",
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
+    url: siteConfig.siteUrl,
+    title: `${siteConfig.name} | Romblon Island Hopping & Budget Tour Packages`,
     description,
     siteName: siteConfig.name,
     locale: "en_PH",
@@ -45,7 +66,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} | ${siteConfig.tagline}`,
+    title: `${siteConfig.name} | Romblon Island Hopping & Budget Tour Packages`,
     description,
     images: ["/images/og.jpg"],
   },
@@ -77,7 +98,49 @@ const jsonLd = {
         addressRegion: "Romblon",
         addressCountry: "PH",
       },
-      areaServed: { "@type": "AdministrativeArea", name: "Romblon, Philippines" },
+      areaServed: [
+        { "@type": "AdministrativeArea", name: "Romblon, Philippines" },
+        { "@type": "Country", name: "Philippines" },
+      ],
+      knowsAbout: [
+        "Island hopping in Romblon",
+        "Unexplored beaches in the Philippines",
+        "Budget travel in the Philippines",
+        "Tablas Island travel",
+        "Sibuyan Island travel",
+        "Carabao Island travel",
+      ],
+      // Built from the published rate sheet in lib/tours.ts. The advertised
+      // figure is the largest-group (cheapest) tier, which is what "from"
+      // pricing means here — never a number we made up.
+      hasOfferCatalog: {
+        "@type": "OfferCatalog",
+        name: "Romblon tour packages",
+        itemListElement: [
+          ...dayTours.map((t) => ({
+            "@type": "Offer",
+            name: `${t.name} day tour`,
+            price: t.rates["21plus"],
+            priceCurrency: "PHP",
+            itemOffered: {
+              "@type": "TouristTrip",
+              name: `${t.name} day tour`,
+              description: t.highlights.join(", "),
+            },
+          })),
+          ...multidayTours.map((t) => ({
+            "@type": "Offer",
+            name: t.name,
+            price: t.rates["21plus"],
+            priceCurrency: "PHP",
+            itemOffered: {
+              "@type": "TouristTrip",
+              name: t.name,
+              description: `${t.duration} package in Romblon, Philippines.`,
+            },
+          })),
+        ],
+      },
     },
     {
       "@type": "FAQPage",
@@ -94,7 +157,7 @@ const jsonLd = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang="en"
+      lang="en-PH"
       className={`${outfit.variable} ${jakarta.variable} h-full antialiased`}
       suppressHydrationWarning
     >
