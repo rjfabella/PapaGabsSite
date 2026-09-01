@@ -8,6 +8,7 @@ import { RateCards } from "@/components/RateCards";
 import { Gallery } from "@/components/Gallery";
 import { PromoVideo } from "@/components/PromoVideo";
 import { Faq } from "@/components/Faq";
+import { TeamGallery } from "@/components/TeamGallery";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { FloatingLinks } from "@/components/FloatingLinks";
@@ -26,6 +27,7 @@ export default function Home() {
         <Gallery />
         <PromoVideo />
         <Faq />
+        <TeamGallery />
         <Contact />
       </main>
       <Footer />
