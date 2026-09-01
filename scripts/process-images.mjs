@@ -1,15 +1,20 @@
 import sharp from "sharp";
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
-const RES = "D:/github/PapaGabsSite/resources";
+// Resolved from this file so the script writes into whichever checkout it is
+// run from. It previously hardcoded an absolute path into a git worktree, so
+// regenerated images landed outside the repo and never reached public/.
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+
+const RES = `${ROOT}/resources`;
 const DEST_DIR = `${RES}/images/destinations`;
 const TOUR_DIR = `${RES}/images/tours`;
 const LOGO_SRC = `${RES}/Papagabs logo 300pixels.png`;
 const DOT_LOGO_SRC = `${RES}/DOT logo.svg`;
 const ROMBLON_TOURISM_LOGO_SRC = `${RES}/Romblon Tourism Logo`;
-const OUT_ROOT =
-  "D:/github/PapaGabsSite/.claude/worktrees/romblon-travel-agency-site-dce074/public/images";
+const OUT_ROOT = `${ROOT}/public/images`;
 
 const d = (name) => path.join(DEST_DIR, `${name}.jpg`);
 const t = (name) => path.join(TOUR_DIR, `Copy of ${name}.jpg`);
@@ -64,6 +69,13 @@ const HERO_SRC = d("Carabao Island 3");
 const OG_SRC = d("Romblon Island 1");
 
 /**
+ * Team and guest photos. Supplied as a mix of landscape and portrait, so the
+ * grid crops them to a common ratio rather than showing them at native size.
+ */
+const TEAM_DIR = `${RES}/images/team and guests`;
+const TEAM = ["team1", "team2", "team3", "guests1", "guest2", "guests3", "guests4"];
+
+/**
  * Downloadable rate cards. The originals are ~2.5MB PNGs of photographic
  * posters, so they re-encode to JPEG at a fraction of the size with no visible
  * loss. Full size keeps the native 1024x1536 so the tables stay readable when
@@ -98,6 +110,13 @@ const jobs = [
   })),
 
   ...PACKAGE_IMAGES.map((p) => ({ src: p.src, out: `packages/${p.out}.jpg`, w: 1200, q: 80 })),
+
+  ...TEAM.map((name) => ({
+    src: path.join(TEAM_DIR, `${name}.jpg`),
+    out: `team/${name}.jpg`,
+    w: 900,
+    q: 78,
+  })),
 
   ...POSTERS.flatMap((p) => [
     { src: p.src, out: `downloads/papagabs-${p.out}.jpg`, w: 1024, q: 92 },
