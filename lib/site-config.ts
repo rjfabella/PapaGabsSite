@@ -15,6 +15,10 @@ export const siteConfig = {
   mapsQuery: "Papagabs Travel and Tours, Sitio Baito, Brgy. Poctoy, Odiongan, Romblon",
   siteUrl: "https://papagabstravel.com",
 
+  // Site credit, matching the footer on calatravaromblon.gov.ph.
+  developerName: "RJ Fabella",
+  developerUrl: "https://rjfabella.github.io/rj-portfolio/",
+
   // Accreditation / partner links shown as floating badges
   dotUrl: "https://www.tourism.gov.ph",
   romblonTourismUrl: "https://www.facebook.com/profile.php?id=61590316604668",
