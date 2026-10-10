@@ -11,7 +11,8 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RES = `${ROOT}/resources`;
 const DEST_DIR = `${RES}/images/destinations`;
 const TOUR_DIR = `${RES}/images/tours`;
-const LOGO_SRC = `${RES}/Papagabs logo 300pixels.png`;
+// 2026 rebrand artwork. The previous mark is kept in resources/ for reference.
+const LOGO_SRC = `${RES}/papagabs new logo.png`;
 const DOT_LOGO_SRC = `${RES}/DOT logo.svg`;
 const ROMBLON_TOURISM_LOGO_SRC = `${RES}/Romblon Tourism Logo`;
 const OUT_ROOT = `${ROOT}/public/images`;
@@ -63,6 +64,10 @@ const PACKAGE_IMAGES = [
   { out: "boracay-carabao", src: d("Carabao Island 4") },
   { out: "ferrol-looc-stafe", src: d("Ferrol 2") },
   { out: "odiongan-calatrava-sanagustin", src: d("San Agustin 3") },
+  // Promo lineup. The three single-island packages reuse the existing
+  // sibuyan/romblon/tablas artwork; the multi-island ones need their own.
+  { out: "tri-island-explorer", src: d("Romblon Island 3") },
+  { out: "four-island-ultimate", src: d("Carabao Island 1") },
 ];
 
 const HERO_SRC = d("Carabao Island 3");
@@ -89,6 +94,10 @@ const POSTERS = [
   {
     src: `${RES}/images/posters/Published rates for multi packages.png`,
     out: "multiday-package-rates",
+  },
+  {
+    src: `${RES}/images/posters/Promo Rates until December 2026.png`,
+    out: "promo-rates-2026",
   },
 ];
 
@@ -144,8 +153,28 @@ async function run() {
   }
   console.log(`ok: ${jobs.length - missing}/${jobs.length} photos`);
 
-  await sharp(LOGO_SRC)
-    .resize({ width: 512 })
+  /**
+   * The 2026 mark is transparent artwork in brand blue and orange, drawn for
+   * light backgrounds. The header, hero and footer each place the logo on dark
+   * teal inside a rounded-full ring, where the blue lettering nearly vanishes
+   * and the ring encloses mostly empty space — the previous mark was an opaque
+   * disc, so it never had this problem. Compositing onto a white disc restores
+   * that behaviour and keeps the mark legible on any background.
+   */
+  const LOGO_PX = 512;
+  const LOGO_INSET = 0.9;
+  const disc = Buffer.from(
+    `<svg width="${LOGO_PX}" height="${LOGO_PX}">` +
+      `<circle cx="${LOGO_PX / 2}" cy="${LOGO_PX / 2}" r="${LOGO_PX / 2}" fill="#ffffff"/>` +
+      `</svg>`
+  );
+  const artPx = Math.round(LOGO_PX * LOGO_INSET);
+  const logoArt = await sharp(LOGO_SRC)
+    .resize(artPx, artPx, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  await sharp(disc)
+    .composite([{ input: logoArt, gravity: "center" }])
     .png({ quality: 90 })
     .toFile(path.join(OUT_ROOT, "logo.png"));
   console.log("ok: logo.png");

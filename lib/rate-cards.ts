@@ -11,6 +11,13 @@ export type RateCard = {
 
 export const rateCards: RateCard[] = [
   {
+    title: "Promo Rates until December 2026",
+    blurb: "Limited-time island packages — Sibuyan, Romblon, Tablas and the multi-island tours.",
+    file: "/images/downloads/papagabs-promo-rates-2026.jpg",
+    preview: "/images/downloads/preview-promo-rates-2026.jpg",
+    downloadAs: "Papagabs-Promo-Rates-until-December-2026.jpg",
+  },
+  {
     title: "Day Tour Rates",
     blurb: "Odiongan, Calatrava, Ferrol and Looc activity tours, with inclusions.",
     file: "/images/downloads/papagabs-day-tour-rates.jpg",
