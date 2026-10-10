@@ -97,6 +97,19 @@ export function Footer() {
             {siteConfig.accreditations.join(" · ")} · DTI Reg. No. {siteConfig.dtiRegNo}
           </p>
         </div>
+
+        {/* Site credit, mirroring the footer on calatravaromblon.gov.ph. */}
+        <p className="mt-6 text-center text-[11px] tracking-[0.08em] text-white/25">
+          Developed by{" "}
+          <a
+            href={siteConfig.developerUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 transition-colors hover:text-white/50"
+          >
+            {siteConfig.developerName}
+          </a>
+        </p>
       </div>
     </footer>
   );
