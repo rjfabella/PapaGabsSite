@@ -25,6 +25,8 @@ const ROMBLON_TOURISM_LOGO_SRC = `${RES}/Romblon Tourism Logo`;
  * Trimmed, all three land between 3.4:1 and 4:1 and line up at a common
  * height. Output keeps alpha, so the marks sit on any background.
  */
+const APP_DIR = `${ROOT}/app`;
+
 const PARTNER_LOGO_DIR = `${RES}/logos`;
 const PARTNER_LOGO_H = 120; // 3x the 40px display height
 const PARTNER_LOGOS = [
@@ -152,6 +154,48 @@ const jobs = [
   { src: t("CLM05125"), out: "about/fleet.jpg", w: 1400, q: 80 },
 ];
 
+/**
+ * Writes a multi-size .ico. sharp cannot encode ICO, so the container is
+ * assembled by hand around PNG frames — PNG-in-ICO is what the 256px frame
+ * requires anyway and is read by every browser in use.
+ *
+ * Layout: a 6-byte ICONDIR, then one 16-byte ICONDIRENTRY per frame, then the
+ * frame data. A frame of 256px is recorded as 0 in the single width/height
+ * bytes, which is how the format encodes 256.
+ */
+async function writeIco(source, outPath, sizes) {
+  const frames = [];
+  for (const size of sizes) {
+    const png = await sharp(source)
+      .resize(size, size, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+      .png({ compressionLevel: 9 })
+      .toBuffer();
+    frames.push({ size, png });
+  }
+
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0); // reserved
+  header.writeUInt16LE(1, 2); // 1 = icon
+  header.writeUInt16LE(frames.length, 4);
+
+  const dir = Buffer.alloc(16 * frames.length);
+  let offset = header.length + dir.length;
+  frames.forEach((frame, i) => {
+    const o = i * 16;
+    dir[o] = frame.size >= 256 ? 0 : frame.size;
+    dir[o + 1] = frame.size >= 256 ? 0 : frame.size;
+    dir[o + 2] = 0; // palette entries
+    dir[o + 3] = 0; // reserved
+    dir.writeUInt16LE(1, o + 4); // colour planes
+    dir.writeUInt16LE(32, o + 6); // bits per pixel
+    dir.writeUInt32LE(frame.png.length, o + 8);
+    dir.writeUInt32LE(offset, o + 12);
+    offset += frame.png.length;
+  });
+
+  fs.writeFileSync(outPath, Buffer.concat([header, dir, ...frames.map((f) => f.png)]));
+}
+
 async function run() {
   let missing = 0;
   for (const job of jobs) {
@@ -190,11 +234,19 @@ async function run() {
     .resize(artPx, artPx, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer();
-  await sharp(disc)
+  const logoDisc = await sharp(disc)
     .composite([{ input: logoArt, gravity: "center" }])
     .png({ quality: 90 })
-    .toFile(path.join(OUT_ROOT, "logo.png"));
+    .toBuffer();
+  fs.writeFileSync(path.join(OUT_ROOT, "logo.png"), logoDisc);
   console.log("ok: logo.png");
+
+  // The browser tab icon. app/favicon.ico is a Next file convention, and it is
+  // the first icon link in the emitted HTML, so it is what the tab actually
+  // shows — it has to be regenerated here or it silently keeps the old mark
+  // while every other surface shows the new one.
+  await writeIco(logoDisc, path.join(APP_DIR, "favicon.ico"), [16, 32, 48, 256]);
+  console.log("ok: app/favicon.ico");
 
   // Accreditation badges — trimmed so artwork reaches the badge edge
   const logosDir = path.join(OUT_ROOT, "logos");
