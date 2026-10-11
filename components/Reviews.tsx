@@ -11,30 +11,32 @@ const partnerIcons = { globe: Globe, newspaper: Newspaper, plane: Plane };
 
 function PartnerBadge({ partner }: { partner: Partner }) {
   const Icon = partnerIcons[partner.icon];
-  const inner = (
+
+  // With real artwork the mark carries the brand name, so repeating it as
+  // text alongside would just duplicate it — the name stays as alt text.
+  const inner = partner.logo ? (
     <>
-      {partner.logo ? (
-        <Image
-          src={partner.logo}
-          alt={partner.name}
-          width={120}
-          height={40}
-          className="h-8 w-auto object-contain"
-        />
-      ) : (
-        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-deep/5 text-deep/55">
-          <Icon className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
-        </span>
-      )}
-      <span className="text-left">
-        <span className="block font-display text-sm font-semibold text-deep">{partner.name}</span>
-        <span className="block text-[11px] text-ink/50">{partner.kind}</span>
+      <Image
+        src={partner.logo}
+        alt={partner.name}
+        width={160}
+        height={40}
+        className="h-10 w-auto max-w-full object-contain"
+      />
+      <span className="text-[11px] text-ink/50">{partner.kind}</span>
+    </>
+  ) : (
+    <>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-deep/5 text-deep/55">
+        <Icon className="h-5 w-5" strokeWidth={2} aria-hidden />
       </span>
+      <span className="font-display text-sm font-semibold text-deep">{partner.name}</span>
+      <span className="-mt-1.5 text-[11px] text-ink/50">{partner.kind}</span>
     </>
   );
 
   const className =
-    "inline-flex items-center gap-3 rounded-2xl border border-deep/8 bg-white px-4 py-3 shadow-sm";
+    "flex h-full w-[150px] flex-col items-center justify-center gap-2 rounded-2xl border border-deep/8 bg-white px-4 py-4 text-center shadow-sm sm:w-[168px]";
 
   return partner.url ? (
     <a
@@ -143,7 +145,7 @@ export function Reviews() {
             </h3>
             <ul className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
               {partners.map((partner) => (
-                <li key={partner.name}>
+                <li key={partner.name} className="h-full">
                   <PartnerBadge partner={partner} />
                 </li>
               ))}

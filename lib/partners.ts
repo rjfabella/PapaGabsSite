@@ -1,11 +1,13 @@
 /**
  * Brands shown under the guest reviews.
  *
- * No official logo artwork has been supplied, so each entry renders a lucide
- * icon plus a wordmark rather than the real mark. Dropping a file into
- * public/images/partners/ and setting `logo` makes the component use it
- * instead — third-party logos are trademarks, so only use artwork the brand
- * has actually provided or published for this purpose.
+ * Artwork is supplied in resources/logos/ and processed by
+ * scripts/process-images.mjs, which trims each mark before sizing it to a
+ * common height — the Manila Bulletin source is a square with the artwork in
+ * a thin band, so untrimmed it would render far smaller than the others.
+ *
+ * `icon` is the fallback for an entry with no artwork yet; it is unused while
+ * every brand has a logo.
  *
  * `url` is intentionally unset: linking a brand's homepage from a partner
  * badge implies an endorsement they have not given. Set it to the specific
@@ -23,10 +25,22 @@ export type Partner = {
 };
 
 export const partners: Partner[] = [
-  { name: "Rappler", kind: "Online news", icon: "globe" },
-  { name: "Manila Bulletin", kind: "National newspaper", icon: "newspaper" },
-  { name: "Sunlight Air", kind: "Airline", icon: "plane" },
+  {
+    name: "Rappler",
+    kind: "Online news",
+    icon: "globe",
+    logo: "/images/partners/rappler.png",
+  },
+  {
+    name: "Manila Bulletin",
+    kind: "National newspaper",
+    icon: "newspaper",
+    logo: "/images/partners/manila-bulletin.png",
+  },
+  {
+    name: "Sunlight Air",
+    kind: "Airline",
+    icon: "plane",
+    logo: "/images/partners/sunlight-air.png",
+  },
 ];
-
-/** True while no entry has real logo artwork. */
-export const partnersAwaitingLogos = partners.every((p) => !p.logo);
