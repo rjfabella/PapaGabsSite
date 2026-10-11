@@ -1,6 +1,7 @@
 import { Img as Image } from "./Img";
-import { Download, FileImage, Maximize2 } from "lucide-react";
+import { Download, FileImage, Maximize2, BookOpen } from "lucide-react";
 import { rateCards } from "@/lib/rate-cards";
+import { brochurePages } from "@/lib/brochure";
 import { assetUrl } from "@/lib/asset";
 import { SectionHeading } from "./SectionHeading";
 import { Reveal } from "./Reveal";
@@ -74,6 +75,29 @@ export function RateCards() {
             );
           })}
         </div>
+
+        {/* Download only — no preview, so this is a link row rather than a card. */}
+        <Reveal delay={180}>
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-2xl border border-deep/8 bg-white/70 px-5 py-4 backdrop-blur sm:flex-row">
+            <span className="flex items-center gap-2 text-sm font-semibold text-deep">
+              <BookOpen className="h-4 w-4 text-lagoon" strokeWidth={2.5} />
+              Download our brochure
+            </span>
+            <span className="flex flex-wrap items-center justify-center gap-2">
+              {brochurePages.map((page) => (
+                <a
+                  key={page.file}
+                  href={assetUrl(page.file)}
+                  download={page.downloadAs}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-deep/12 px-4 py-2 text-xs font-semibold text-deep transition-colors hover:border-lagoon hover:bg-lagoon/8"
+                >
+                  <Download className="h-3.5 w-3.5" strokeWidth={2.5} />
+                  {page.label}
+                </a>
+              ))}
+            </span>
+          </div>
+        </Reveal>
 
         <Reveal delay={200}>
           <p className="mt-8 text-center text-xs text-ink/50">
