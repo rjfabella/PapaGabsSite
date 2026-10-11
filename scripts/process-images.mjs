@@ -105,6 +105,17 @@ const TEAM = ["team1", "team2", "team3", "guests1", "guest2", "guests3", "guests
  * loss. Full size keeps the native 1024x1536 so the tables stay readable when
  * zoomed or printed; a lighter preview is used for the on-page thumbnail.
  */
+/**
+ * Brochure pages, offered as a download only — no on-page preview, so these
+ * are sized for reading and printing rather than for a thumbnail. Page 2's
+ * source is only 1492px wide, so withoutEnlargement leaves it at native size
+ * rather than upscaling it to match page 1.
+ */
+const BROCHURE = [
+  { src: `${RES}/images/brochure/Brochure Page 1.png`, out: "brochure-page-1" },
+  { src: `${RES}/images/brochure/Brochure Page 2.png`, out: "brochure-page-2" },
+];
+
 const POSTERS = [
   {
     src: `${RES}/images/posters/Published Rate for Day Tours.png`,
@@ -144,6 +155,13 @@ const jobs = [
     out: `team/${name}.jpg`,
     w: 900,
     q: 78,
+  })),
+
+  ...BROCHURE.map((b) => ({
+    src: b.src,
+    out: `downloads/papagabs-${b.out}.jpg`,
+    w: 2000,
+    q: 88,
   })),
 
   ...POSTERS.flatMap((p) => [
