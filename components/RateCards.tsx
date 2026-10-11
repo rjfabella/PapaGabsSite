@@ -18,23 +18,35 @@ export function RateCards() {
           icon={FileImage}
         />
 
+        {/* The landscape promo sheet takes a full row of its own; the two
+            portrait sheets sit side by side on the row below. */}
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {rateCards.map((card, i) => (
-            <Reveal key={card.file} delay={i * 90}>
+          {rateCards.map((card, i) => {
+            const isLandscape = card.orientation === "landscape";
+            return (
+            <Reveal
+              key={card.file}
+              delay={i * 90}
+              className={isLandscape ? "sm:col-span-2" : undefined}
+            >
               <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-deep/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl hover:shadow-deep/10">
                 <a
                   href={assetUrl(card.file)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="relative block aspect-[1024/1536] overflow-hidden bg-foam"
+                  className={`relative block overflow-hidden bg-foam ${
+                    isLandscape ? "aspect-[3/2]" : "aspect-[1024/1536]"
+                  }`}
                   aria-label={`View ${card.title} full size in a new tab`}
                 >
                   <Image
                     src={card.preview}
                     alt={`${card.title} rate card`}
                     fill
-                    sizes="(min-width: 640px) 45vw, 90vw"
-                    className="object-cover object-top transition-transform duration-700 group-hover:scale-105"
+                    sizes={isLandscape ? "(min-width: 640px) 90vw, 90vw" : "(min-width: 640px) 45vw, 90vw"}
+                    className={`transition-transform duration-700 group-hover:scale-105 ${
+                      isLandscape ? "object-contain" : "object-cover object-top"
+                    }`}
                   />
                   <span className="absolute inset-0 flex items-center justify-center bg-deep/0 transition-colors group-hover:bg-deep/25">
                     <span className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-xs font-semibold text-deep opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
@@ -59,7 +71,8 @@ export function RateCards() {
                 </div>
               </article>
             </Reveal>
-          ))}
+            );
+          })}
         </div>
 
         <Reveal delay={200}>
