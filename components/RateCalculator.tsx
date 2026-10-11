@@ -2,54 +2,76 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Calculator, Minus, Plus, Info, Copy, Check, Mail } from "lucide-react";
-import { dayTours, multidayTours, type RateTier } from "@/lib/tours";
+import {
+  bandFor,
+  dayTours,
+  multidayTours,
+  partyBoatAddOn,
+  promo,
+  promoBands,
+  promoPackages,
+  standardBands,
+  type RateBand,
+} from "@/lib/tours";
 import { siteConfig } from "@/lib/site-config";
 import { SectionHeading } from "./SectionHeading";
 import { Reveal } from "./Reveal";
 import { peso } from "./Packages";
 
+/**
+ * An option carries its own rate bands, because the promo lineup bands at
+ * 2/6/10/20 pax while the standard published rates band at 5/10/15/21. The
+ * minimum group size therefore depends on which package is selected.
+ */
 type Option = {
   slug: string;
   name: string;
   kind: "Day tour" | "Multiday";
-  rates: RateTier;
-  addOn?: { label: string; rates: RateTier };
+  groupLabel: string;
+  bands: RateBand<string>[];
+  rates: Record<string, number>;
+  /** Per-person add-on, priced by band. */
+  addOn?: { label: string; rates: Record<string, number> };
+  /** Flat add-on charged once for the group, not per person. */
+  flatAddOn?: { label: string; price: number };
 };
 
-const options: Option[] = [
-  ...dayTours.map((t) => ({
-    slug: t.slug,
-    name: t.name,
-    kind: "Day tour" as const,
-    rates: t.rates,
-    addOn: t.addOn,
-  })),
-  ...multidayTours.map((t) => ({
-    slug: t.slug,
-    name: t.name,
-    kind: "Multiday" as const,
-    rates: t.rates,
-    addOn: t.addOn,
-  })),
-];
+const dayOptions: Option[] = dayTours.map((t) => ({
+  slug: t.slug,
+  name: t.name,
+  kind: "Day tour" as const,
+  groupLabel: "Day tours",
+  bands: standardBands,
+  rates: t.rates,
+  addOn: t.addOn,
+}));
 
-const MIN_PAX = 5;
+const multidayOptions: Option[] = promo.active
+  ? promoPackages.map((p) => ({
+      slug: p.slug,
+      name: p.name,
+      kind: "Multiday" as const,
+      groupLabel: "Promo packages",
+      bands: promoBands,
+      rates: p.rates,
+      flatAddOn: { label: partyBoatAddOn.label, price: partyBoatAddOn.price },
+    }))
+  : multidayTours.map((t) => ({
+      slug: t.slug,
+      name: t.name,
+      kind: "Multiday" as const,
+      groupLabel: "Multiday packages",
+      bands: standardBands,
+      rates: t.rates,
+      addOn: t.addOn,
+    }));
+
+const options: Option[] = [...dayOptions, ...multidayOptions];
+
 const MAX_PAX = 60;
 
-/** Published rates start at 5 pax; tiers step at 10, 15 and 21. */
-function tierFor(pax: number): keyof RateTier {
-  if (pax >= 21) return "21plus";
-  if (pax >= 15) return "15to20";
-  if (pax >= 10) return "10to14";
-  return "5to9";
-}
-
-const tierName: Record<keyof RateTier, string> = {
-  "5to9": "5–9 pax",
-  "10to14": "10–14 pax",
-  "15to20": "15–20 pax",
-  "21plus": "21+ pax",
-};
+/** Smallest group the selected package is priced for. */
+const minPaxFor = (o: Option) => o.bands[0].minPax;
 
 /**
  * Copies text, falling back to execCommand where the async Clipboard API is
@@ -86,21 +108,32 @@ export function RateCalculator() {
   const [withAddOn, setWithAddOn] = useState(false);
 
   const selected = options.find((o) => o.slug === slug) ?? options[0];
+  const minPax = minPaxFor(selected);
 
   const result = useMemo(() => {
-    const tier = tierFor(pax);
-    const perPerson = selected.rates[tier];
-    const addOnPer = withAddOn && selected.addOn ? selected.addOn.rates[tier] : 0;
-    const totalPer = perPerson + addOnPer;
-    return { tier, perPerson, addOnPer, totalPer, total: totalPer * pax };
+    const key = bandFor(selected.bands, pax);
+    const band = selected.bands.find((b) => b.key === key) ?? selected.bands[0];
+    const perPerson = selected.rates[key];
+    const addOnPer = withAddOn && selected.addOn ? selected.addOn.rates[key] : 0;
+    const addOnFlat = withAddOn && selected.flatAddOn ? selected.flatAddOn.price : 0;
+    return {
+      bandLabel: band.label,
+      perPerson,
+      addOnPer,
+      addOnFlat,
+      total: (perPerson + addOnPer) * pax + addOnFlat,
+    };
   }, [selected, pax, withAddOn]);
 
-  const addOn = selected.addOn;
+  const addOn = selected.addOn ?? selected.flatAddOn;
 
-  // Switching packages clears an add-on that no longer applies.
+  // Switching packages clears an add-on that no longer applies, and lifts the
+  // group size if the new package is priced from a larger minimum.
   function selectPackage(nextSlug: string) {
     setSlug(nextSlug);
     setWithAddOn(false);
+    const next = options.find((o) => o.slug === nextSlug);
+    if (next) setPax((p) => Math.max(minPaxFor(next), p));
   }
 
   /**
@@ -119,6 +152,9 @@ export function RateCalculator() {
     ];
     if (result.addOnPer > 0 && addOn) {
       lines.push(`Add-on: ${addOn.label} (+${peso(result.addOnPer)} per person)`);
+    }
+    if (result.addOnFlat > 0 && addOn) {
+      lines.push(`Add-on: ${addOn.label} (+${peso(result.addOnFlat)} for the group)`);
     }
     lines.push(`Estimated total: ${peso(result.total)}`, ``, `Preferred dates: `);
     return lines.join("\n");
@@ -172,24 +208,17 @@ export function RateCalculator() {
                     onChange={(e) => selectPackage(e.target.value)}
                     className="mt-2 w-full rounded-xl border border-deep/12 bg-sand px-4 py-3 text-sm font-medium text-deep outline-none transition-colors focus:border-lagoon focus:ring-2 focus:ring-lagoon/25"
                   >
-                    <optgroup label="Day tours">
-                      {options
-                        .filter((o) => o.kind === "Day tour")
-                        .map((o) => (
-                          <option key={o.slug} value={o.slug}>
-                            {o.name}
-                          </option>
-                        ))}
-                    </optgroup>
-                    <optgroup label="Multiday packages">
-                      {options
-                        .filter((o) => o.kind === "Multiday")
-                        .map((o) => (
-                          <option key={o.slug} value={o.slug}>
-                            {o.name}
-                          </option>
-                        ))}
-                    </optgroup>
+                    {[...new Set(options.map((o) => o.groupLabel))].map((group) => (
+                      <optgroup key={group} label={group}>
+                        {options
+                          .filter((o) => o.groupLabel === group)
+                          .map((o) => (
+                            <option key={o.slug} value={o.slug}>
+                              {o.name}
+                            </option>
+                          ))}
+                      </optgroup>
+                    ))}
                   </select>
                 </div>
 
@@ -200,8 +229,8 @@ export function RateCalculator() {
                   <div className="mt-2 flex items-center gap-3">
                     <button
                       type="button"
-                      onClick={() => setPax((p) => Math.max(MIN_PAX, p - 1))}
-                      disabled={pax <= MIN_PAX}
+                      onClick={() => setPax((p) => Math.max(minPax, p - 1))}
+                      disabled={pax <= minPax}
                       aria-label="Decrease group size"
                       className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-deep/12 text-deep transition-colors hover:bg-foam disabled:opacity-35"
                     >
@@ -228,7 +257,7 @@ export function RateCalculator() {
 
                   <input
                     type="range"
-                    min={MIN_PAX}
+                    min={minPax}
                     max={MAX_PAX}
                     value={pax}
                     onChange={(e) => setPax(Number(e.target.value))}
@@ -254,7 +283,7 @@ export function RateCalculator() {
               <div className="flex flex-col justify-between bg-deep p-7 text-white md:col-span-2">
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wider text-white/50">
-                    {selected.kind} · {tierName[result.tier]}
+                    {selected.kind} · {result.bandLabel}
                   </p>
                   <h3 className="mt-1 font-display text-lg font-semibold">{selected.name}</h3>
 
@@ -267,6 +296,12 @@ export function RateCalculator() {
                       <div className="flex justify-between text-white/75">
                         <dt>Add-on per person</dt>
                         <dd className="font-medium text-white">+{peso(result.addOnPer)}</dd>
+                      </div>
+                    )}
+                    {result.addOnFlat > 0 && (
+                      <div className="flex justify-between text-white/75">
+                        <dt>Add-on (per boat)</dt>
+                        <dd className="font-medium text-white">+{peso(result.addOnFlat)}</dd>
                       </div>
                     )}
                     <div className="flex justify-between text-white/75">

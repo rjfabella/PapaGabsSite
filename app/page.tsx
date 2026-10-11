@@ -9,6 +9,7 @@ import { Gallery } from "@/components/Gallery";
 import { PromoVideo } from "@/components/PromoVideo";
 import { Faq } from "@/components/Faq";
 import { TeamGallery } from "@/components/TeamGallery";
+import { Reviews } from "@/components/Reviews";
 import { Contact } from "@/components/Contact";
 import { Footer } from "@/components/Footer";
 import { FloatingLinks } from "@/components/FloatingLinks";
@@ -28,6 +29,7 @@ export default function Home() {
         <PromoVideo />
         <Faq />
         <TeamGallery />
+        <Reviews />
         <Contact />
       </main>
       <Footer />

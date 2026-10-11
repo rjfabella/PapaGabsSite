@@ -11,9 +11,27 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const RES = `${ROOT}/resources`;
 const DEST_DIR = `${RES}/images/destinations`;
 const TOUR_DIR = `${RES}/images/tours`;
-const LOGO_SRC = `${RES}/Papagabs logo 300pixels.png`;
+// 2026 rebrand artwork. The previous mark is kept in resources/ for reference.
+const LOGO_SRC = `${RES}/papagabs new logo.png`;
 const DOT_LOGO_SRC = `${RES}/DOT logo.svg`;
 const ROMBLON_TOURISM_LOGO_SRC = `${RES}/Romblon Tourism Logo`;
+
+/**
+ * Partner brand marks, as supplied by the client.
+ *
+ * Each is trimmed before resizing: the Manila Bulletin file is a 2400x2400
+ * square whose artwork is a thin band in the middle, so sizing it by height
+ * untrimmed would render the mark a fraction of the size of the others.
+ * Trimmed, all three land between 3.4:1 and 4:1 and line up at a common
+ * height. Output keeps alpha, so the marks sit on any background.
+ */
+const PARTNER_LOGO_DIR = `${RES}/logos`;
+const PARTNER_LOGO_H = 120; // 3x the 40px display height
+const PARTNER_LOGOS = [
+  { src: "rappler.webp", out: "rappler" },
+  { src: "manila-bulletin-logo-black-and-white.png", out: "manila-bulletin" },
+  { src: "Sunlight+Air+BI_Horizontal+Full+Color.webp", out: "sunlight-air" },
+];
 const OUT_ROOT = `${ROOT}/public/images`;
 
 const d = (name) => path.join(DEST_DIR, `${name}.jpg`);
@@ -63,6 +81,10 @@ const PACKAGE_IMAGES = [
   { out: "boracay-carabao", src: d("Carabao Island 4") },
   { out: "ferrol-looc-stafe", src: d("Ferrol 2") },
   { out: "odiongan-calatrava-sanagustin", src: d("San Agustin 3") },
+  // Promo lineup. The three single-island packages reuse the existing
+  // sibuyan/romblon/tablas artwork; the multi-island ones need their own.
+  { out: "tri-island-explorer", src: d("Romblon Island 3") },
+  { out: "four-island-ultimate", src: d("Carabao Island 1") },
 ];
 
 const HERO_SRC = d("Carabao Island 3");
@@ -89,6 +111,10 @@ const POSTERS = [
   {
     src: `${RES}/images/posters/Published rates for multi packages.png`,
     out: "multiday-package-rates",
+  },
+  {
+    src: `${RES}/images/posters/Promo Rates until December 2026.png`,
+    out: "promo-rates-2026",
   },
 ];
 
@@ -144,8 +170,28 @@ async function run() {
   }
   console.log(`ok: ${jobs.length - missing}/${jobs.length} photos`);
 
-  await sharp(LOGO_SRC)
-    .resize({ width: 512 })
+  /**
+   * The 2026 mark is transparent artwork in brand blue and orange, drawn for
+   * light backgrounds. The header, hero and footer each place the logo on dark
+   * teal inside a rounded-full ring, where the blue lettering nearly vanishes
+   * and the ring encloses mostly empty space — the previous mark was an opaque
+   * disc, so it never had this problem. Compositing onto a white disc restores
+   * that behaviour and keeps the mark legible on any background.
+   */
+  const LOGO_PX = 512;
+  const LOGO_INSET = 0.9;
+  const disc = Buffer.from(
+    `<svg width="${LOGO_PX}" height="${LOGO_PX}">` +
+      `<circle cx="${LOGO_PX / 2}" cy="${LOGO_PX / 2}" r="${LOGO_PX / 2}" fill="#ffffff"/>` +
+      `</svg>`
+  );
+  const artPx = Math.round(LOGO_PX * LOGO_INSET);
+  const logoArt = await sharp(LOGO_SRC)
+    .resize(artPx, artPx, { fit: "contain", background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  await sharp(disc)
+    .composite([{ input: logoArt, gravity: "center" }])
     .png({ quality: 90 })
     .toFile(path.join(OUT_ROOT, "logo.png"));
   console.log("ok: logo.png");
@@ -169,6 +215,23 @@ async function run() {
     .jpeg({ quality: 82, mozjpeg: true })
     .toFile(path.join(OUT_ROOT, "og.jpg"));
   console.log("ok: og.jpg");
+
+  const partnersDir = path.join(OUT_ROOT, "partners");
+  fs.mkdirSync(partnersDir, { recursive: true });
+  for (const logo of PARTNER_LOGOS) {
+    const src = path.join(PARTNER_LOGO_DIR, logo.src);
+    if (!fs.existsSync(src)) {
+      console.error("MISSING SOURCE:", src);
+      missing++;
+      continue;
+    }
+    await sharp(src)
+      .trim({ threshold: 1 })
+      .resize({ height: PARTNER_LOGO_H, fit: "inside", withoutEnlargement: false })
+      .png({ quality: 92 })
+      .toFile(path.join(partnersDir, `${logo.out}.png`));
+    console.log(`ok: partners/${logo.out}.png`);
+  }
 
   if (missing) {
     console.error(`\n${missing} source file(s) missing — see MISSING SOURCE lines above.`);

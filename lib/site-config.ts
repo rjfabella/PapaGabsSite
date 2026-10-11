@@ -12,6 +12,7 @@ export const siteConfig = {
   accreditations: ["DOT Accredited", "PPA TAPPS Accredited"],
   facebookPageUrl: "https://www.facebook.com/jorotonihill",
   facebookMessengerUrl: "https://m.me/jorotonihill",
+  facebookReviewsUrl: "https://www.facebook.com/jorotonihill/reviews/",
   mapsQuery: "Papagabs Travel and Tours, Sitio Baito, Brgy. Poctoy, Odiongan, Romblon",
   siteUrl: "https://papagabstravel.com",
 

@@ -5,7 +5,7 @@ import { siteConfig } from "./site-config";
 export const faqs = [
   {
     q: "What is included in the published rates?",
-    a: "Day tours include meals (snack and lunch), transportation by van and boat within the island, and entrance fees. Multiday packages include van and boat transfers within Romblon, hotel accommodation, entrance and environmental fees, meals (breakfast, lunch and dinner), and a DOT-accredited tour guide.",
+    a: "Day tours include van transfer, entrance fees, environmental fees and lunch. Multiday packages include hotel accommodation, van and boat transfers within Romblon, entrance and environmental fees, all meals (breakfast, lunch and dinner), and a DOT-accredited tour guide.",
   },
   {
     q: "What is not included?",
@@ -21,7 +21,7 @@ export const faqs = [
   },
   {
     q: "How long are the multiday packages?",
-    a: "The multiday packages on this page are run as 2 days and 1 night. If you would like a longer or customised itinerary, send us a message and we can build one around your schedule.",
+    a: "The single-island packages run as 2 days and 1 night. The Tri-Island Explorer is 5 days and 4 nights, and the Four-Island Ultimate Adventure is 6 days and 5 nights. If you would like a different or customised itinerary, send us a message and we can build one around your schedule.",
   },
   {
     q: "How do I book a tour?",

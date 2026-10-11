@@ -3,7 +3,7 @@ import { Outfit, Plus_Jakarta_Sans } from "next/font/google";
 import "./globals.css";
 import { siteConfig } from "@/lib/site-config";
 import { faqs } from "@/lib/faqs";
-import { dayTours, multidayTours } from "@/lib/tours";
+import { dayTours, multidayTours, promo, promoBands, promoPackages } from "@/lib/tours";
 import { assetUrl } from "@/lib/asset";
 
 const outfit = Outfit({
@@ -128,17 +128,33 @@ const jsonLd = {
               description: t.highlights.join(", "),
             },
           })),
-          ...multidayTours.map((t) => ({
-            "@type": "Offer",
-            name: t.name,
-            price: t.rates["21plus"],
-            priceCurrency: "PHP",
-            itemOffered: {
-              "@type": "TouristTrip",
-              name: t.name,
-              description: `${t.duration} package in Romblon, Philippines.`,
-            },
-          })),
+          // While the promo runs it is what the site actually sells, so the
+          // structured data has to advertise those prices rather than the
+          // standard lineup — otherwise search results quote retired rates.
+          ...(promo.active
+            ? promoPackages.map((p) => ({
+                "@type": "Offer",
+                name: p.name,
+                price: p.rates[promoBands[promoBands.length - 1].key],
+                priceCurrency: "PHP",
+                validThrough: "2026-12-31",
+                itemOffered: {
+                  "@type": "TouristTrip",
+                  name: p.name,
+                  description: `${p.duration} package in Romblon, Philippines. ${p.highlights.join(", ")}.`,
+                },
+              }))
+            : multidayTours.map((t) => ({
+                "@type": "Offer",
+                name: t.name,
+                price: t.rates["21plus"],
+                priceCurrency: "PHP",
+                itemOffered: {
+                  "@type": "TouristTrip",
+                  name: t.name,
+                  description: `${t.duration} package in Romblon, Philippines.`,
+                },
+              }))),
         ],
       },
     },

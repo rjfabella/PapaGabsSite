@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Drop folder for new client reference material; copied into resources/ when used.
+/NEW REF/

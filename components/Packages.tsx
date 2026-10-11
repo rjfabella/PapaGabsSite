@@ -10,6 +10,7 @@ import {
   Plus,
   MapPin,
   Ship,
+  Tag,
 } from "lucide-react";
 import {
   dayTourInclusions,
@@ -17,9 +18,16 @@ import {
   multidayExclusions,
   multidayInclusions,
   multidayTours,
-  rateTierLabels,
+  partyBoatAddOn,
+  promo,
+  promoBands,
+  promoInclusions,
+  promoPackages,
+  standardBands,
   type DayTour,
   type MultidayTour,
+  type PromoPackage,
+  type RateBand,
 } from "@/lib/tours";
 import { siteConfig } from "@/lib/site-config";
 import { MessengerIcon } from "./BrandIcons";
@@ -30,9 +38,18 @@ export function peso(n: number) {
   return `₱${n.toLocaleString("en-PH")}`;
 }
 
-function PackageCard({ tour, index }: { tour: DayTour | MultidayTour; index: number }) {
+function PackageCard({
+  tour,
+  index,
+  bands,
+}: {
+  tour: DayTour | MultidayTour;
+  index: number;
+  bands: RateBand<string>[];
+}) {
   const isDayTour = "highlights" in tour;
-  const lowest = Math.min(...rateTierLabels.map((t) => tour.rates[t.key]));
+  const rates = tour.rates as Record<string, number>;
+  const lowest = Math.min(...bands.map((b) => rates[b.key]));
 
   return (
     <Reveal delay={index * 70} className="h-full">
@@ -91,14 +108,12 @@ function PackageCard({ tour, index }: { tour: DayTour | MultidayTour; index: num
             </div>
 
             <div className="mt-3 grid grid-cols-4 gap-1 rounded-xl bg-foam p-1.5">
-              {rateTierLabels.map((t) => (
-                <div key={t.key} className="rounded-lg px-1 py-1.5 text-center">
+              {bands.map((b) => (
+                <div key={b.key} className="rounded-lg px-1 py-1.5 text-center">
                   <p className="text-[10px] font-medium uppercase tracking-wide text-ink/45">
-                    {t.label.replace(" pax", "")}
+                    {b.short}
                   </p>
-                  <p className="mt-0.5 text-[11px] font-semibold text-deep">
-                    {peso(tour.rates[t.key])}
-                  </p>
+                  <p className="mt-0.5 text-[11px] font-semibold text-deep">{peso(rates[b.key])}</p>
                 </div>
               ))}
             </div>
@@ -109,7 +124,9 @@ function PackageCard({ tour, index }: { tour: DayTour | MultidayTour; index: num
                 <div>
                   <p className="text-xs font-semibold text-deep">{tour.addOn.label}</p>
                   <p className="mt-0.5 text-[11px] text-ink/60">
-                    {peso(tour.addOn.rates["21plus"])} – {peso(tour.addOn.rates["5to9"])} per person
+                    {peso(Math.min(...bands.map((b) => tour.addOn!.rates[b.key as never])))} –{" "}
+                    {peso(Math.max(...bands.map((b) => tour.addOn!.rates[b.key as never])))} per
+                    person
                   </p>
                 </div>
               </div>
@@ -131,12 +148,109 @@ function PackageCard({ tour, index }: { tour: DayTour | MultidayTour; index: num
   );
 }
 
+/**
+ * Promo packages carry their own shape — island subtitle, a Highlights or
+ * Destinations list depending on the tour, and a closing note — so they get
+ * their own card rather than being forced through PackageCard.
+ */
+function PromoCard({ pkg, index }: { pkg: PromoPackage; index: number }) {
+  const lowest = Math.min(...promoBands.map((b) => pkg.rates[b.key]));
+
+  return (
+    <Reveal delay={index * 70} className="h-full">
+      <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-deep/8 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-deep/10">
+        <div className="relative aspect-16/10 overflow-hidden">
+          <Image
+            src={pkg.image}
+            alt={pkg.name}
+            fill
+            sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 90vw"
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          <div className="absolute inset-0 bg-linear-to-t from-deep/70 via-deep/10 to-transparent" />
+
+          <span className="absolute left-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-deep backdrop-blur">
+            <CalendarDays className="h-3 w-3 text-lagoon" strokeWidth={2.5} /> {pkg.duration}
+          </span>
+
+          <span className="absolute right-4 top-4 inline-flex items-center gap-1.5 rounded-full bg-coral px-3 py-1 text-[11px] font-semibold uppercase tracking-wider text-white shadow-sm">
+            <Tag className="h-3 w-3" strokeWidth={2.5} /> {promo.label}
+          </span>
+
+          <div className="absolute inset-x-4 bottom-3">
+            <h3 className="font-display text-xl font-semibold text-white drop-shadow-sm">
+              {pkg.name}
+            </h3>
+            <p className="mt-0.5 flex items-center gap-1.5 text-xs font-medium text-white/85">
+              <MapPin className="h-3 w-3 shrink-0" strokeWidth={2.5} />
+              {pkg.subtitle ?? "Romblon Province"}
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-1 flex-col p-5">
+          <p className="text-[10px] font-semibold uppercase tracking-wider text-ink/45">
+            {pkg.listLabel}
+          </p>
+          <ul className="mb-4 mt-2 space-y-1.5">
+            {pkg.highlights.map((h) => (
+              <li key={h} className="flex gap-2 text-sm text-ink/70">
+                <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-palm" strokeWidth={3} />
+                {h}
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-auto">
+            {pkg.note && (
+              <p className="mb-3 rounded-xl bg-lagoon/8 px-3 py-2 text-[11px] leading-relaxed text-ink/65">
+                {pkg.note}
+              </p>
+            )}
+
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-xs font-medium text-ink/50">from</span>
+              <span className="font-display text-2xl font-semibold text-deep">{peso(lowest)}</span>
+              <span className="text-xs font-medium text-ink/50">/ person</span>
+            </div>
+
+            <div className="mt-3 grid grid-cols-4 gap-1 rounded-xl bg-foam p-1.5">
+              {promoBands.map((b) => (
+                <div key={b.key} className="rounded-lg px-1 py-1.5 text-center">
+                  <p className="text-[10px] font-medium uppercase tracking-wide text-ink/45">
+                    {b.short}
+                  </p>
+                  <p className="mt-0.5 text-[11px] font-semibold text-deep">
+                    {peso(pkg.rates[b.key])}
+                  </p>
+                </div>
+              ))}
+            </div>
+
+            <a
+              href={siteConfig.facebookMessengerUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-deep px-4 py-3 text-sm font-semibold text-white transition-all hover:bg-lagoon-dark"
+            >
+              <MessengerIcon className="h-4 w-4" />
+              Inquire about this tour
+            </a>
+          </div>
+        </div>
+      </article>
+    </Reveal>
+  );
+}
+
 function InclusionsBox({
   inclusions,
   exclusions,
+  addOn,
 }: {
   inclusions: string[];
   exclusions?: string[];
+  addOn?: string;
 }) {
   return (
     <Reveal>
@@ -174,6 +288,13 @@ function InclusionsBox({
                 </li>
               ))}
             </ul>
+
+            {addOn && (
+              <p className="mt-4 flex gap-2 rounded-xl bg-sun/12 px-3 py-2 text-xs font-medium text-deep">
+                <Plus className="mt-0.5 h-3.5 w-3.5 shrink-0 text-coral-dark" strokeWidth={3} />
+                {addOn}
+              </p>
+            )}
           </div>
         )}
       </div>
@@ -206,9 +327,9 @@ export function Packages() {
                   { key: "day", label: "Day tours", icon: Sun, count: dayTours.length },
                   {
                     key: "multiday",
-                    label: "Multiday",
+                    label: promo.active ? "Promo packages" : "Multiday",
                     icon: CalendarDays,
-                    count: multidayTours.length,
+                    count: promo.active ? promoPackages.length : multidayTours.length,
                   },
                 ] as const
               ).map((t) => (
@@ -243,19 +364,42 @@ export function Packages() {
           <div key="day" className="animate-fade-in">
             <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {dayTours.map((tour, i) => (
-                <PackageCard key={tour.slug} tour={tour} index={i} />
+                <PackageCard key={tour.slug} tour={tour} index={i} bands={standardBands} />
               ))}
             </div>
             <InclusionsBox inclusions={dayTourInclusions} />
           </div>
         ) : (
           <div key="multiday" className="animate-fade-in">
-            <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {multidayTours.map((tour, i) => (
-                <PackageCard key={tour.slug} tour={tour} index={i} />
-              ))}
-            </div>
-            <InclusionsBox inclusions={multidayInclusions} exclusions={multidayExclusions} />
+            {promo.active ? (
+              <>
+                <Reveal delay={60}>
+                  <p className="mx-auto mt-8 flex max-w-xl items-center justify-center gap-2 rounded-full bg-coral/10 px-5 py-2.5 text-center text-xs font-medium text-coral-dark">
+                    <Tag className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                    {promo.note}
+                  </p>
+                </Reveal>
+                <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {promoPackages.map((pkg, i) => (
+                    <PromoCard key={pkg.slug} pkg={pkg} index={i} />
+                  ))}
+                </div>
+                <InclusionsBox
+                  inclusions={promoInclusions}
+                  exclusions={multidayExclusions}
+                  addOn={`${partyBoatAddOn.label} — ${peso(partyBoatAddOn.price)} per boat`}
+                />
+              </>
+            ) : (
+              <>
+                <div className="mt-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {multidayTours.map((tour, i) => (
+                    <PackageCard key={tour.slug} tour={tour} index={i} bands={standardBands} />
+                  ))}
+                </div>
+                <InclusionsBox inclusions={multidayInclusions} exclusions={multidayExclusions} />
+              </>
+            )}
           </div>
         )}
       </div>

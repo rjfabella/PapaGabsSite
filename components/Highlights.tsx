@@ -16,7 +16,7 @@ const highlights = [
   {
     icon: UtensilsCrossed,
     title: "Meals included",
-    body: "Snack and lunch on day tours; breakfast, lunch and dinner on multiday packages.",
+    body: "Lunch on day tours; breakfast, lunch and dinner on multiday packages.",
   },
   {
     icon: Ticket,
