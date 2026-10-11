@@ -1,9 +1,54 @@
-import { Star, Quote, ExternalLink } from "lucide-react";
+import { Star, Quote, ExternalLink, Globe, Newspaper, Plane } from "lucide-react";
 import { guestReviews, hasPlaceholderReviews, type GuestReview } from "@/lib/reviews";
+import { partners, type Partner } from "@/lib/partners";
 import { siteConfig } from "@/lib/site-config";
+import { Img as Image } from "./Img";
 import { FacebookIcon } from "./BrandIcons";
 import { SectionHeading } from "./SectionHeading";
 import { Reveal } from "./Reveal";
+
+const partnerIcons = { globe: Globe, newspaper: Newspaper, plane: Plane };
+
+function PartnerBadge({ partner }: { partner: Partner }) {
+  const Icon = partnerIcons[partner.icon];
+  const inner = (
+    <>
+      {partner.logo ? (
+        <Image
+          src={partner.logo}
+          alt={partner.name}
+          width={120}
+          height={40}
+          className="h-8 w-auto object-contain"
+        />
+      ) : (
+        <span className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-deep/5 text-deep/55">
+          <Icon className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
+        </span>
+      )}
+      <span className="text-left">
+        <span className="block font-display text-sm font-semibold text-deep">{partner.name}</span>
+        <span className="block text-[11px] text-ink/50">{partner.kind}</span>
+      </span>
+    </>
+  );
+
+  const className =
+    "inline-flex items-center gap-3 rounded-2xl border border-deep/8 bg-white px-4 py-3 shadow-sm";
+
+  return partner.url ? (
+    <a
+      href={partner.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={`${className} transition-colors hover:border-lagoon/40`}
+    >
+      {inner}
+    </a>
+  ) : (
+    <div className={className}>{inner}</div>
+  );
+}
 
 function Stars({ rating }: { rating: number }) {
   return (
@@ -88,6 +133,21 @@ export function Reviews() {
                 Tap through to read the real ones.
               </p>
             )}
+          </div>
+        </Reveal>
+
+        <Reveal delay={260}>
+          <div className="mt-16 border-t border-deep/8 pt-10">
+            <h3 className="text-center text-xs font-semibold uppercase tracking-[0.18em] text-ink/45">
+              Brands we&apos;ve partnered with
+            </h3>
+            <ul className="mt-6 flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+              {partners.map((partner) => (
+                <li key={partner.name}>
+                  <PartnerBadge partner={partner} />
+                </li>
+              ))}
+            </ul>
           </div>
         </Reveal>
       </div>
